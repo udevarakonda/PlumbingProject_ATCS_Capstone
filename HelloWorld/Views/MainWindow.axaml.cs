@@ -100,6 +100,42 @@ namespace HelloWorld.Views
                 }
             }
         }
+        
+        public void DeleteButtonClick(object sender, RoutedEventArgs args)
+        {
+            string connectionString = "Server=sqlclassdb-instance-1.cqjxl5z5vyvr.us-east-2.rds.amazonaws.com;Database=capstone_2324_pallet;User ID=pallet;Password=8KFj9WnbfRDS;";
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+
+                    // Get the highest ID from 'testtable'
+                    string getMaxIdQuery = "SELECT MAX(id) FROM testtable;";
+                    MySqlCommand getMaxIdCommand = new MySqlCommand(getMaxIdQuery, connection);
+                    int maxId = Convert.ToInt32(getMaxIdCommand.ExecuteScalar());
+
+                    if (maxId > 0)
+                    {
+                        // Delete the row with the highest ID
+                        string deleteQuery = $"DELETE FROM testtable WHERE id = {maxId};";
+                        MySqlCommand deleteCommand = new MySqlCommand(deleteQuery, connection);
+                        deleteCommand.ExecuteNonQuery();
+
+                        messageTextBlock.Text = $"Row with ID {maxId} deleted from testtable.";
+                    }
+                    else
+                    {
+                        messageTextBlock.Text = "No rows to delete.";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    messageTextBlock.Text = $"Error: {ex.Message}";
+                }
+            }
+        }
 
 
 
