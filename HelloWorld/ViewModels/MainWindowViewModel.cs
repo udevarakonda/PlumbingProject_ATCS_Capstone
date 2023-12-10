@@ -1,4 +1,5 @@
-﻿namespace HelloWorld.ViewModels;
+﻿
+namespace HelloWorld.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {

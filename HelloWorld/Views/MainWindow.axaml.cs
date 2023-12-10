@@ -2,19 +2,32 @@
 
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Data.Converters;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media;
 using MySql.Data.MySqlClient;
 using System;
+using System.Collections.ObjectModel;
+using System.Globalization;
+using HelloWorld.Converters;
+using HelloWorld.ViewModels;
 
 namespace HelloWorld.Views
 {
+
+    public class TableDataRow
+    {
+        public bool IsEven { get; set; }
+        public string Data { get; set; }
+    }
+
     public partial class MainWindow : Window
     {
         private TextBox keyTextBox;
         private TextBox nameTextBox;
         private TextBlock messageTextBlock;
-
+        public ObservableCollection<TableDataRow> TableData { get; } = new ObservableCollection<TableDataRow>();
         public MainWindow()
         {
             InitializeComponent();
@@ -105,35 +118,41 @@ namespace HelloWorld.Views
         }
         
         public void DeleteButtonClick(object sender, RoutedEventArgs args)
-{
-    string connectionString = "Server=sqlclassdb-instance-1.cqjxl5z5vyvr.us-east-2.rds.amazonaws.com;Database=capstone_2324_pallet;User ID=pallet;Password=8KFj9WnbfRDS;";
-
-    using (MySqlConnection connection = new MySqlConnection(connectionString))
-    {
-        try
         {
-            connection.Open();
+            string connectionString = "Server=sqlclassdb-instance-1.cqjxl5z5vyvr.us-east-2.rds.amazonaws.com;Database=capstone_2324_pallet;User ID=pallet;Password=8KFj9WnbfRDS;";
 
-            // Get the ID to delete
-            int idToDelete = Convert.ToInt32(keyBox.Text);
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
 
-            // Delete the row from 'testtable'
-            string deleteQuery = $"DELETE FROM testtable WHERE id = {idToDelete};";
-            MySqlCommand deleteCommand = new MySqlCommand(deleteQuery, connection);
-            int rowsAffected = deleteCommand.ExecuteNonQuery();
+                    // Get the highest ID from 'testtable'
+                    string getMaxIdQuery = "SELECT MAX(id) FROM testtable;";
+                    MySqlCommand getMaxIdCommand = new MySqlCommand(getMaxIdQuery, connection);
+                    int maxId = Convert.ToInt32(getMaxIdCommand.ExecuteScalar());
 
-            if (rowsAffected > 0)
-                message.Text = $"Row with ID {idToDelete} deleted successfully.";
-            else
-                message.Text = $"No rows found with ID {idToDelete}.";
+                    if (maxId > 0)
+                    {
+                        // Delete the row with the highest ID
+                        string deleteQuery = $"DELETE FROM testtable WHERE id = {maxId};";
+                        MySqlCommand deleteCommand = new MySqlCommand(deleteQuery, connection);
+                        deleteCommand.ExecuteNonQuery();
+
+                        messageTextBlock.Text = $"Row with ID {maxId} deleted from testtable.";
+                    }
+                    else
+                    {
+                        messageTextBlock.Text = "No rows to delete.";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    messageTextBlock.Text = $"Error: {ex.Message}";
+                }
+            }
+            RefreshTable();
         }
-        catch (Exception ex)
-        {
-            message.Text = $"Error: {ex.Message}";
-        }
-        RefreshTable();
-    }
-}
 
         private void RefreshTable()
         {
