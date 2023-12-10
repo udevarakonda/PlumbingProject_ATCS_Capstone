@@ -21,6 +21,7 @@ namespace HelloWorld.Views
             messageTextBlock = this.FindControl<TextBlock>("message");
             keyTextBox = this.FindControl<TextBox>("keyBox");
             nameTextBox = this.FindControl<TextBox>("nameBox");
+            RefreshTable();
         }
 
         // private void InitializeComponent()
@@ -57,6 +58,7 @@ namespace HelloWorld.Views
                     messageTextBlock.Text = $"Error: {ex.Message}";
                 }
             }
+            RefreshTable();
         }
 
         public void ReadButtonClick(object sender, RoutedEventArgs args)
@@ -99,35 +101,65 @@ namespace HelloWorld.Views
                     messageTextBlock.Text = $"Error: {ex.Message}";
                 }
             }
+            
         }
         
         public void DeleteButtonClick(object sender, RoutedEventArgs args)
-        {
-            string connectionString = "Server=sqlclassdb-instance-1.cqjxl5z5vyvr.us-east-2.rds.amazonaws.com;Database=capstone_2324_pallet;User ID=pallet;Password=8KFj9WnbfRDS;";
+{
+    string connectionString = "Server=sqlclassdb-instance-1.cqjxl5z5vyvr.us-east-2.rds.amazonaws.com;Database=capstone_2324_pallet;User ID=pallet;Password=8KFj9WnbfRDS;";
 
+    using (MySqlConnection connection = new MySqlConnection(connectionString))
+    {
+        try
+        {
+            connection.Open();
+
+            // Get the ID to delete
+            int idToDelete = Convert.ToInt32(keyBox.Text);
+
+            // Delete the row from 'testtable'
+            string deleteQuery = $"DELETE FROM testtable WHERE id = {idToDelete};";
+            MySqlCommand deleteCommand = new MySqlCommand(deleteQuery, connection);
+            int rowsAffected = deleteCommand.ExecuteNonQuery();
+
+            if (rowsAffected > 0)
+                message.Text = $"Row with ID {idToDelete} deleted successfully.";
+            else
+                message.Text = $"No rows found with ID {idToDelete}.";
+        }
+        catch (Exception ex)
+        {
+            message.Text = $"Error: {ex.Message}";
+        }
+        RefreshTable();
+    }
+}
+
+        private void RefreshTable()
+        {
+            // Clear existing table content
+            dataStackPanel.Children.Clear();
+
+            // Load updated data into the table
+            string connectionString = "Server=sqlclassdb-instance-1.cqjxl5z5vyvr.us-east-2.rds.amazonaws.com;Database=capstone_2324_pallet;User ID=pallet;Password=8KFj9WnbfRDS;";
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 try
                 {
                     connection.Open();
 
-                    // Get the highest ID from 'testtable'
-                    string getMaxIdQuery = "SELECT MAX(id) FROM testtable;";
-                    MySqlCommand getMaxIdCommand = new MySqlCommand(getMaxIdQuery, connection);
-                    int maxId = Convert.ToInt32(getMaxIdCommand.ExecuteScalar());
-
-                    if (maxId > 0)
+                    // Retrieve values from 'testtable'
+                    string readQuery = "SELECT id, name FROM testtable;";
+                    MySqlCommand readCommand = new MySqlCommand(readQuery, connection);
+                    using (MySqlDataReader reader = readCommand.ExecuteReader())
                     {
-                        // Delete the row with the highest ID
-                        string deleteQuery = $"DELETE FROM testtable WHERE id = {maxId};";
-                        MySqlCommand deleteCommand = new MySqlCommand(deleteQuery, connection);
-                        deleteCommand.ExecuteNonQuery();
-
-                        messageTextBlock.Text = $"Row with ID {maxId} deleted from testtable.";
-                    }
-                    else
-                    {
-                        messageTextBlock.Text = "No rows to delete.";
+                        while (reader.Read())
+                        {
+                            int id = reader.GetInt32(reader.GetOrdinal("id"));
+                            string name = reader.GetString(reader.GetOrdinal("name"));
+                            TextBlock row = new TextBlock { Text = $"{id}: {name}" };
+                            dataStackPanel.Children.Add(row);
+                        }
                     }
                 }
                 catch (Exception ex)

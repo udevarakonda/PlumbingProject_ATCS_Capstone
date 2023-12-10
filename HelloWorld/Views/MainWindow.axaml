@@ -16,20 +16,30 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <StackPanel Margin="20">
-        <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
 
-         <!-- Add a StackPanel to display the data -->
-        <StackPanel x:Name="dataStackPanel">
+        <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="0"/>
+        <TextBox x:Name="keyBox" Width="200" Watermark="Enter ID" Grid.Row="1"/>
+        <TextBox x:Name="nameBox" Width="200" Watermark="Enter Name" Grid.Row="2"/>
+        <Button Content="Read" Width="100" Height="30" Click="ReadButtonClick" Grid.Row="3"/>
+        <Button Content="Write" Width="100" Height="30" Click="WriteButtonClick" Grid.Row="4"/>
+        <Button Content="Delete" Width="100" Height="30" Click="DeleteButtonClick" Grid.Row="5"/>
+        
+        <!-- Centered StackPanel for the data -->
+        <StackPanel x:Name="dataStackPanel" Grid.Row="6" Margin="0,10,0,0" HorizontalAlignment="Center">
             <!-- Data will be added here dynamically -->
         </StackPanel>
 
-        <Button Content="Read" Width="100" Height="30" Click="ReadButtonClick"/>
-        <Button Content="Write" Width="100" Height="30" Margin="0,10,0,0" Click="WriteButtonClick"/>
-        <Button Content="Delete" Click="DeleteButtonClick" Width="100" Height="30" Margin="0,10,0,0"/>
-        <TextBox x:Name="keyBox" Width="200" Watermark="Enter ID"/>
-        <TextBox x:Name="nameBox" Width="200" Watermark="Enter Name"/>
-        <TextBlock Margin="0 10" x:Name="message">Ready...</TextBlock>
-    </StackPanel>
+        <TextBlock x:Name="message" Grid.Row="7" Margin="0,10,0,0">Ready...</TextBlock>
+    </Grid>
 
 </Window>
