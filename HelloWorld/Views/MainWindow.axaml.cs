@@ -2,32 +2,21 @@
 
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Data.Converters;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using MySql.Data.MySqlClient;
 using System;
-using System.Collections.ObjectModel;
-using System.Globalization;
-using HelloWorld.Converters;
-using HelloWorld.ViewModels;
+using System.Drawing;
 
 namespace HelloWorld.Views
 {
-
-    public class TableDataRow
-    {
-        public bool IsEven { get; set; }
-        public string Data { get; set; }
-    }
-
     public partial class MainWindow : Window
     {
         private TextBox keyTextBox;
         private TextBox nameTextBox;
         private TextBlock messageTextBlock;
-        public ObservableCollection<TableDataRow> TableData { get; } = new ObservableCollection<TableDataRow>();
+
         public MainWindow()
         {
             InitializeComponent();
@@ -95,15 +84,26 @@ namespace HelloWorld.Views
 
                         while (reader.Read())
                         {
+                            // Create a Border control to wrap each row of data
+                            Border rowBorder = new Border
+                            {
+                                BorderBrush = new SolidColorBrush(Colors.Black),
+                                BorderThickness = new Thickness(1),
+                                Padding = new Thickness(5),
+                                Margin = new Thickness(0, 5, 0, 0)
+                            };
+
                             // Create a TextBlock to display each row of data
                             TextBlock rowTextBlock = new TextBlock
                             {
                                 Text = $"{reader["id"]}: {reader["name"]}",
-                                Margin = new Thickness(0, 5, 0, 0)
                             };
 
-                            // Add the TextBlock to the StackPanel
-                            dataStackPanel.Children.Add(rowTextBlock);
+                            // Add the TextBlock to the Border
+                            rowBorder.Child = rowTextBlock;
+
+                            // Add the Border to the StackPanel
+                            dataStackPanel.Children.Add(rowBorder);
                         }
                     }
 
@@ -114,8 +114,9 @@ namespace HelloWorld.Views
                     messageTextBlock.Text = $"Error: {ex.Message}";
                 }
             }
-            
         }
+
+
         
         public void DeleteButtonClick(object sender, RoutedEventArgs args)
         {
@@ -174,10 +175,26 @@ namespace HelloWorld.Views
                     {
                         while (reader.Read())
                         {
-                            int id = reader.GetInt32(reader.GetOrdinal("id"));
-                            string name = reader.GetString(reader.GetOrdinal("name"));
-                            TextBlock row = new TextBlock { Text = $"{id}: {name}" };
-                            dataStackPanel.Children.Add(row);
+                            Border rowBorder = new Border
+                            {
+                                BorderBrush = new SolidColorBrush(Colors.Black),
+                                BorderThickness = new Thickness(1),
+                                Padding = new Thickness(5),
+                                Margin = new Thickness(0, 5, 0, 0)
+                            };
+
+                            // int id = reader.GetInt32(reader.GetOrdinal("id"));
+                            // string name = reader.GetString(reader.GetOrdinal("name"));
+                            // TextBlock row = new TextBlock { Text = $"{id}: {name}" };
+
+                            TextBlock rowTextBlock = new TextBlock
+                            {
+                                Text = $"{reader["id"]}: {reader["name"]}",
+                            };
+
+                            rowBorder.Child = rowTextBlock;
+                            
+                            dataStackPanel.Children.Add(rowBorder);
                         }
                     }
                 }
