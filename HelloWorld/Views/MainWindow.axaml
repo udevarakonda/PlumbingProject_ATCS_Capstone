@@ -30,16 +30,15 @@
         <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="0"/>
         <TextBox x:Name="keyBox" Width="200" Watermark="Enter ID" Grid.Row="1"/>
         <TextBox x:Name="nameBox" Width="200" Watermark="Enter Name" Grid.Row="2"/>
-        <Button Content="Read" Width="100" Height="30" Click="ReadButtonClick" Grid.Row="3"/>
+        <Button Content="Refresh Table" Width="120" Height="30" Click="ReadButtonClick" Grid.Row="3"/>
         <Button Content="Write" Width="100" Height="30" Click="WriteButtonClick" Grid.Row="4"/>
         <Button Content="Delete" Width="100" Height="30" Click="DeleteButtonClick" Grid.Row="5"/>
-        
-        <!-- Centered StackPanel for the data -->
+
+        <!-- Two-column Grid for the data -->
         <StackPanel x:Name="dataStackPanel" Grid.Row="6" Margin="0,10,0,0" HorizontalAlignment="Center">
             <!-- Data will be added here dynamically -->
         </StackPanel>
 
         <TextBlock x:Name="message" Grid.Row="7" Margin="0,10,0,0">Ready...</TextBlock>
     </Grid>
-
 </Window>

@@ -8,6 +8,8 @@ using Avalonia.Media;
 using MySql.Data.MySqlClient;
 using System;
 using System.Drawing;
+using Avalonia.Animation;
+using System.Threading.Tasks;
 
 namespace HelloWorld.Views
 {
@@ -65,55 +67,8 @@ namespace HelloWorld.Views
 
         public void ReadButtonClick(object sender, RoutedEventArgs args)
         {
-            string connectionString = "Server=sqlclassdb-instance-1.cqjxl5z5vyvr.us-east-2.rds.amazonaws.com;Database=capstone_2324_pallet;User ID=pallet;Password=8KFj9WnbfRDS;";
-
-            using (MySqlConnection connection = new MySqlConnection(connectionString))
-            {
-                try
-                {
-                    connection.Open();
-
-                    // Retrieve values from 'testtable'
-                    string readQuery = "SELECT * FROM testtable;";
-                    MySqlCommand readCommand = new MySqlCommand(readQuery, connection);
-
-                    using (MySqlDataReader reader = readCommand.ExecuteReader())
-                    {
-                        // Clear existing data
-                        dataStackPanel.Children.Clear();
-
-                        while (reader.Read())
-                        {
-                            // Create a Border control to wrap each row of data
-                            Border rowBorder = new Border
-                            {
-                                BorderBrush = new SolidColorBrush(Colors.Black),
-                                BorderThickness = new Thickness(1),
-                                Padding = new Thickness(5),
-                                Margin = new Thickness(0, 5, 0, 0)
-                            };
-
-                            // Create a TextBlock to display each row of data
-                            TextBlock rowTextBlock = new TextBlock
-                            {
-                                Text = $"{reader["id"]}: {reader["name"]}",
-                            };
-
-                            // Add the TextBlock to the Border
-                            rowBorder.Child = rowTextBlock;
-
-                            // Add the Border to the StackPanel
-                            dataStackPanel.Children.Add(rowBorder);
-                        }
-                    }
-
-                    messageTextBlock.Text = "Data loaded from testtable.";
-                }
-                catch (Exception ex)
-                {
-                    messageTextBlock.Text = $"Error: {ex.Message}";
-                }
-            }
+            RefreshTable();
+            messageTextBlock.Text = "Refreshed Table";
         }
 
 
@@ -155,13 +110,15 @@ namespace HelloWorld.Views
             RefreshTable();
         }
 
-        private void RefreshTable()
+
+        private async void RefreshTable()
         {
             // Clear existing table content
             dataStackPanel.Children.Clear();
 
             // Load updated data into the table
             string connectionString = "Server=sqlclassdb-instance-1.cqjxl5z5vyvr.us-east-2.rds.amazonaws.com;Database=capstone_2324_pallet;User ID=pallet;Password=8KFj9WnbfRDS;";
+
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 try
@@ -171,30 +128,62 @@ namespace HelloWorld.Views
                     // Retrieve values from 'testtable'
                     string readQuery = "SELECT id, name FROM testtable;";
                     MySqlCommand readCommand = new MySqlCommand(readQuery, connection);
+
                     using (MySqlDataReader reader = readCommand.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            Border rowBorder = new Border
+                            DockPanel rowDockPanel = new DockPanel
+                            {
+                                LastChildFill = true,
+                                Margin = new Thickness(0)
+                            };
+
+                            // ID Column
+                            Border idBorder = new Border
                             {
                                 BorderBrush = new SolidColorBrush(Colors.Black),
                                 BorderThickness = new Thickness(1),
-                                Padding = new Thickness(5),
-                                Margin = new Thickness(0, 5, 0, 0)
+                                Background = new SolidColorBrush(Colors.LightBlue) // Set the background color for the ID column
                             };
 
-                            // int id = reader.GetInt32(reader.GetOrdinal("id"));
-                            // string name = reader.GetString(reader.GetOrdinal("name"));
-                            // TextBlock row = new TextBlock { Text = $"{id}: {name}" };
-
-                            TextBlock rowTextBlock = new TextBlock
+                            TextBlock idTextBlock = new TextBlock
                             {
-                                Text = $"{reader["id"]}: {reader["name"]}",
+                                Text = $"  {reader["id"]}  ",
+                                FontSize = 30,
+                                Opacity = 0
                             };
 
-                            rowBorder.Child = rowTextBlock;
+                            idBorder.Child = idTextBlock;
+
+                            DockPanel.SetDock(idBorder, Dock.Left);
+                            rowDockPanel.Children.Add(idBorder);
+
+                            // Name Column
+                            Border nameBorder = new Border
+                            {
+                                BorderBrush = new SolidColorBrush(Colors.Black),
+                                BorderThickness = new Thickness(1),
+                                Background = new SolidColorBrush(Colors.Orange) // Set the background color for the Name column
+                            };
+
+                            TextBlock nameTextBlock = new TextBlock
+                            {
+                                Text = $" {reader["name"]}",
+                                FontSize = 30,
+                                Opacity = 0
+                            };
+
+                            nameBorder.Child = nameTextBlock;
+                            rowDockPanel.Children.Add(nameBorder);
+
+                            dataStackPanel.Children.Add(rowDockPanel);
                             
-                            dataStackPanel.Children.Add(rowBorder);
+                            // await FadeInAnimation(idTextBlock);
+                            // await FadeInAnimation(nameTextBlock);
+
+                            await FadeInAnimation(idTextBlock);
+                            await FadeInAnimation(nameTextBlock);
                         }
                     }
                 }
@@ -205,51 +194,30 @@ namespace HelloWorld.Views
             }
         }
 
+        private async Task FadeInAnimation(TextBlock textBlock)
+        {
+            double targetOpacity = 1;
+            double durationSeconds = 0.2;
+            double steps = 30;
+
+            for (int i = 0; i <= steps; i++)
+            {
+                double currentOpacity = i / steps * targetOpacity;
+                textBlock.Opacity = currentOpacity;
+                await Task.Delay(TimeSpan.FromSeconds(durationSeconds / steps));
+            }
+
+            // Ensure the final opacity is set
+            textBlock.Opacity = targetOpacity;
+        }
 
 
-        // public void ClickHandler(object sender, RoutedEventArgs args)
-        // {
-        //     var button = (Button)sender;
 
-        //     // Modify the connection string with your MySQL server details
-        //     string connectionString = "Server=sqlclassdb-instance-1.cqjxl5z5vyvr.us-east-2.rds.amazonaws.com;Database=capstone_2324_pallet;User ID=pallet;Password=8KFj9WnbfRDS;";
 
-        //     using (MySqlConnection connection = new MySqlConnection(connectionString))
-        //     {
-        //         try
-        //         {
-        //             connection.Open();
 
-        //             if (button.Content.ToString() == "Read")
-        //             {
-        //                 string query = "SELECT name FROM PlumbingVariables;";
-        //                 MySqlCommand command = new MySqlCommand(query, connection);
 
-        //                 using (MySqlDataReader reader = command.ExecuteReader())
-        //                 {
-        //                     while (reader.Read())
-        //                     {
-        //                         string result = reader.GetString(reader.GetOrdinal("name"));
-        //                         message.Text = result;
-        //                     }
-        //                 }
-        //             }
-        //             else if (button.Content.ToString() == "Write")
-        //             {
-        //                 string nameToWrite = inputTextBox.Text;
-        //                 string query = $"INSERT INTO PlumbingVariables (name) VALUES ('{nameToWrite}');";
-        //                 MySqlCommand command = new MySqlCommand(query, connection);
 
-        //                 command.ExecuteNonQuery();
-        //                 message.Text = "Data written to the PlumbingVariables table!";
-        //             }
-        //         }
-        //         catch (Exception ex)
-        //         {
-        //             // Handle exceptions (e.g., display an error message)
-        //             message.Text = $"Error: {ex.Message}";
-        //         }
-        //     }
-        // }
+
+
     }
 }
